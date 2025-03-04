@@ -1,0 +1,216 @@
+.pio_version 0 // only requires PIO version 0
+
+.program glitch
+.wrap_target
+    pull block  ; get delay1 duration
+    out x, 32   ; and load it to x
+    pull block  ; do the same for delay2
+    out y, 32   ; and load it to y
+    wait 0 pin 0  ; wait for IN_GPIO to go LOW
+    wait 1 pin 0  ; and then HIGH
+delay1:
+    jmp x-- delay1   ; Delay for (x + 1) cycles, x is a 32 bit number
+PUBLIC set1:
+    set pins, 1 ; Turn OUT_GPIO HIGH
+delay2:
+    jmp y-- delay2  ; Delay for (x + 1) cycles, x is a 32 bit number
+PUBLIC set2:
+    set pins, 0 ; Turn OUT_GPIO LOW
+.wrap
+
+
+% c-sdk {
+// this is a raw helper function for use by the user which sets up the GPIO output, and configures the SM to output on a particular pin
+
+void glitch_program_init(PIO pio, uint sm, uint offset, uint out_pin, uint in_pin) {
+  pio_gpio_init(pio, out_pin);
+  pio_sm_set_consecutive_pindirs(pio, sm, out_pin, 1, true);
+  pio_sm_config c = glitch_program_get_default_config(offset);
+  sm_config_set_set_pins(&c, out_pin, 1);
+  sm_config_set_in_pins(&c, in_pin);
+  pio_gpio_init(pio, in_pin);
+  pio_sm_set_consecutive_pindirs(pio, sm, in_pin, 1, false);
+  pio_sm_init(pio, sm, offset, &c);
+  pio_sm_set_enabled(pio, sm, true);
+}
+%}
+
+.program glitch_side
+.side_set 1 opt
+.wrap_target
+    pull block  ; get delay1 duration
+    out x, 32   ; and load it to x
+    pull block  ; do the same for delay2
+    out y, 32   ; and load it to y
+    wait 0 pin 0  ; wait for IN_GPIO to go LOW
+    wait 1 pin 0  ; and then HIGH
+delay1:
+    jmp x-- delay1   ; Delay for (x + 1) cycles, x is a 32 bit number
+PUBLIC set1:
+    set pins, 1   side 1; Turn OUT_GPIO HIGH
+delay2:
+    jmp y-- delay2  ; Delay for (x + 1) cycles, x is a 32 bit number
+PUBLIC set2:
+    set pins, 0   side 0; Turn OUT_GPIO LOW
+.wrap
+
+
+% c-sdk {
+// this is a raw helper function for use by the user which sets up the GPIO output, and configures the SM to output on a particular pin
+
+void glitch_side_program_init(PIO pio, uint sm, uint offset, uint out_pin, uint in_pin) {
+  pio_sm_set_pins_with_mask(pio, sm, 0, (1u << out_pin) | (1u << 28));
+  pio_sm_set_pindirs_with_mask(pio, sm, (1u << out_pin) | (1u << 28), (1u << out_pin) | (1u << 28));
+  pio_gpio_init(pio, out_pin);
+  pio_gpio_init(pio, 28);
+  ; pio_sm_set_consecutive_pindirs(pio, sm, out_pin, 1, true);
+  pio_sm_config c = glitch_side_program_get_default_config(offset);
+  sm_config_set_set_pins(&c, out_pin, 1);
+  sm_config_set_in_pins(&c, in_pin);
+  sm_config_set_sideset_pins(&c, 28);
+  pio_gpio_init(pio, in_pin);
+  pio_sm_set_consecutive_pindirs(pio, sm, in_pin, 1, false);
+  pio_sm_init(pio, sm, offset, &c);
+  pio_sm_set_enabled(pio, sm, true);
+}
+%}
+
+.program glitch_falling
+.wrap_target
+    pull block
+    out x, 32
+    pull block
+    out y, 32
+    wait 1 pin 0
+    wait 0 pin 0
+delay1:
+    jmp x-- delay1
+    set pins, 1
+delay2:
+    jmp y-- delay2
+    set pins, 0
+.wrap
+
+
+% c-sdk {
+// this is a raw helper function for use by the user which sets up the GPIO output, and configures the SM to output on a particular pin
+
+void glitch_falling_program_init(PIO pio, uint sm, uint offset, uint out_pin, uint in_pin) {
+   pio_gpio_init(pio, out_pin);
+   pio_sm_set_consecutive_pindirs(pio, sm, out_pin, 1, true);
+   pio_sm_config c = glitch_falling_program_get_default_config(offset);
+   sm_config_set_set_pins(&c, out_pin, 1);
+   sm_config_set_in_pins(&c, in_pin);
+   pio_gpio_init(pio, in_pin);
+   pio_sm_set_consecutive_pindirs(pio, sm, in_pin, 1, false);
+   pio_sm_init(pio, sm, offset, &c);
+   pio_sm_set_enabled(pio, sm, true);
+}
+%}
+
+.program glitch_low
+.wrap_target
+    pull block
+    out x, 32
+    pull block
+    out y, 32
+    wait 0 pin 0
+    wait 1 pin 0
+delay1:
+    jmp x-- delay1
+    set pins, 0
+delay2:
+    jmp y-- delay2
+    set pins, 1
+.wrap
+
+
+% c-sdk {
+// this is a raw helper function for use by the user which sets up the GPIO output, and configures the SM to output on a particular pin
+
+void glitch_low_program_init(PIO pio, uint sm, uint offset, uint out_pin, uint in_pin) {
+   pio_gpio_init(pio, out_pin);
+   pio_sm_set_consecutive_pindirs(pio, sm, out_pin, 1, true);
+   pio_sm_config c = glitch_low_program_get_default_config(offset);
+   sm_config_set_set_pins(&c, out_pin, 1);
+   sm_config_set_in_pins(&c, in_pin);
+   pio_gpio_init(pio, in_pin);
+   pio_sm_set_consecutive_pindirs(pio, sm, in_pin, 1, false);
+   pio_sm_init(pio, sm, offset, &c);
+   pio_sm_set_enabled(pio, sm, true);
+}
+%}
+
+.program glitch_low_falling
+.wrap_target
+    pull block
+    out x, 32
+    pull block
+    out y, 32
+    wait 1 pin 0
+    wait 0 pin 0
+delay1:
+    jmp x-- delay1
+    set pins, 0
+delay2:
+    jmp y-- delay2
+    set pins, 1
+.wrap
+
+
+% c-sdk {
+// this is a raw helper function for use by the user which sets up the GPIO output, and configures the SM to output on a particular pin
+
+void glitch_low_falling_program_init(PIO pio, uint sm, uint offset, uint out_pin, uint in_pin) {
+   pio_gpio_init(pio, out_pin);
+   pio_sm_set_consecutive_pindirs(pio, sm, out_pin, 1, true);
+   pio_sm_config c = glitch_low_falling_program_get_default_config(offset);
+   sm_config_set_set_pins(&c, out_pin, 1);
+   sm_config_set_in_pins(&c, in_pin);
+   pio_gpio_init(pio, in_pin);
+   pio_sm_set_consecutive_pindirs(pio, sm, in_pin, 1, false);
+   pio_sm_init(pio, sm, offset, &c);
+   pio_sm_set_enabled(pio, sm, true);
+}
+%}
+
+.program glitch_nop
+.wrap_target
+    pull block  ; get delay1 duration
+    out x, 32   ; and load it to x
+    pull block  ; do the same for delay2
+    out y, 32   ; and load it to y
+    wait 0 pin 0  ; wait for IN_GPIO to go LOW
+    wait 1 pin 0  ; and then HIGH
+delay1:
+    jmp x-- delay1   ; Delay for (x + 1) cycles, x is a 32 bit number
+    set pins, 1   ; Turn OUT_GPIO HIGH
+delay2:
+    nop
+    ; nop
+    ; nop
+    ; nop
+    set pins, 0   ; Turn OUT_GPIO HIGH
+    ; nop
+    nop
+    set pins, 1   ; Turn OUT_GPIO LOW
+    jmp y-- delay2  ; Delay for (x + 1) cycles, x is a 32 bit number
+    set pins, 0   ; Turn OUT_GPIO LOW
+.wrap
+
+
+% c-sdk {
+// this is a raw helper function for use by the user which sets up the GPIO output, and configures the SM to output on a particular pin
+
+void glitch_nop_program_init(PIO pio, uint sm, uint offset, uint out_pin, uint in_pin) {
+   pio_gpio_init(pio, out_pin);
+   pio_sm_set_consecutive_pindirs(pio, sm, out_pin, 1, true);
+   pio_sm_config c = glitch_nop_program_get_default_config(offset);
+   sm_config_set_set_pins(&c, out_pin, 1);
+   sm_config_set_in_pins(&c, in_pin);
+   pio_gpio_init(pio, in_pin);
+   pio_sm_set_consecutive_pindirs(pio, sm, in_pin, 1, false);
+   pio_sm_init(pio, sm, offset, &c);
+   pio_sm_set_enabled(pio, sm, true);
+}
+%}

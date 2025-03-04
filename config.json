@@ -1,0 +1,22 @@
+{
+  "serial": "/dev/ttyACM0",
+  "delay_min": 50000,
+  "delay_max": 90000,
+  "length_min": 1150,
+  "length_max": 1300,
+  "step": 200,
+  "freq": 200000,
+  "in_gpio": 3,
+  "out_gpio": 26,
+  "in_dir": 1,
+  "out_dir": 1,
+  "vcc_ctl_pin": 0,
+  "gnd_ctl_pin": 29,
+  "power_cycle_mode": 0,
+  "power_cycle_delay": 50,
+  "trig": 1,
+  "mod": 0,
+  "impl": "stm8_mod",
+  "chip_model": "stm8s005?6",
+  "output": "output.bin"
+}

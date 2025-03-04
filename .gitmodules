@@ -1,0 +1,6 @@
+[submodule "stm8flash"]
+	path = stm8flash
+	url = ./stm8flash/
+[submodule "stm8flash_retriever"]
+	path = stm8flash_retriever
+	url = ./stm8flash_retriever/
