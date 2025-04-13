@@ -91,7 +91,7 @@ if args.config != None:
   try:
     with open(args.config) as f:
       CONFIG = json.load(f)
-      for key, value in CONFIG:
+      for key, value in CONFIG.items():
         vars(config)[key] = value
   except Exception as e:
     logging.error('Something wrong with config file.')
